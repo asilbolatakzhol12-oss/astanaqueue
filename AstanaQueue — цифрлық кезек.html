@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AstanaQueue</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F7F5;--card:#fff;--ink:#12261F;--mute:#3B4F47;--line:#C9D6D0;--acc:#0B7A5A;--accInk:#fff;--note:#E3F1EB;--warn:#FDE7C8;--bad:#9A3412;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1713;--card:#17231D;--ink:#E8F2ED;--mute:#A9BDB3;--line:#2C3F36;--acc:#3DBE93;--accInk:#06231A;--note:#17382C;--warn:#4A3513;--bad:#F2A27A}}
+:root[data-theme="dark"]{--bg:#0E1713;--card:#17231D;--ink:#E8F2ED;--mute:#A9BDB3;--line:#2C3F36;--acc:#3DBE93;--accInk:#06231A;--note:#17382C;--warn:#4A3513;--bad:#F2A27A}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;font-size:16px;line-height:1.45}
+#app{max-width:560px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:16px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.brand{font-weight:700;color:var(--acc);font-size:20px}.sub{margin:2px 0 0;font-size:14px;color:var(--mute)}
+.langs{display:flex;gap:6px}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.lang{min-width:44px;min-height:44px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font-weight:700}
+.lang[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--accInk)}
+.tabs{display:flex;gap:4px;overflow-x:auto;background:var(--card);border-radius:12px;padding:4px}
+.tab{flex:1;min-height:44px;padding:0 12px;border:0;border-radius:9px;background:transparent;color:var(--mute);font-weight:600;white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--acc);color:var(--accInk)}
+.steps{display:flex;gap:6px;list-style:none;margin:0;padding:0}
+.steps li{flex:1;font-size:12px;text-align:center;padding:8px 2px;border-radius:8px;background:var(--card);color:var(--mute);border-bottom:4px solid var(--line)}
+.steps li.on{color:var(--ink);font-weight:700;border-bottom-color:var(--acc)}
+.steps li.done{border-bottom-color:var(--acc)}
+h1,h2{margin:0}h2{font-size:22px}
+.card{background:var(--card);border-radius:14px;padding:18px}
+.opt{width:100%;min-height:64px;margin-bottom:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;font-size:20px;font-weight:700;text-align:left;padding:0 20px}
+.opt[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--accInk)}
+.row{display:flex;gap:12px}.row>*{flex:1}
+.btn{min-height:56px;border:2px solid var(--acc);background:var(--acc);color:var(--accInk);border-radius:12px;font-size:18px;font-weight:700;padding:0 16px}
+.btn.sec{background:var(--card);color:var(--acc)}
+.btn.bad{background:var(--card);border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.num{font-size:72px;font-weight:700;line-height:1.1;color:var(--acc);text-align:center}
+.mute{color:var(--mute);font-size:14px}.c{text-align:center}
+.stat{font-size:28px;font-weight:700}
+.note{border-radius:12px;padding:14px;font-weight:600;background:var(--note)}.note.warn{background:var(--warn)}
+.kgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.kgrid .opt{margin:0;min-height:96px;font-size:22px}
+footer{font-size:12px;color:var(--mute);text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const T={
+kk:{sub:'Жеңілдікті жол жүру билетіне арналған цифрлық кезек',tab_res:'Тұрғын',tab_kiosk:'Киоск',tab_op:'Оператор',tab_mgr:'Басшы',s1:'Санат',s2:'Құжаттар',s3:'Растау',s4:'Талон',cat_pen:'Зейнеткер',cat_stu:'Студент',cat_sch:'Оқушы',cat_gen:'Жалпы кезек',pick_cat:'Санатыңызды таңдаңыз',next:'Жалғастыру',back:'Артқа',docs_t:'Өзіңізбен бірге алыңыз',doc_pen:'Жеке куәлік және зейнеткер куәлігі',doc_stu:'Жеке куәлік және студенттік билет',doc_sch:'Оқушы куәлігі немесе жеке куәлік',doc_gen:'Жеке куәлік',conf_t:'Талонды растаңыз',category:'Санат',take:'Талон алу',your:'Сіздің талоныңыз',serving:'Қазір қызмет алуда',ahead:'Алдыңызда',eta:'Болжам',min:'мин',far:'Алдыңызда 5 адам қалғанда хабарландыру жібереміз.',near:'Кезегіңіз жақындады! Терезеге дайындалыңыз.',now:'Сіздің кезегіңіз келді! Терезеге барыңыз.',cancel:'Талоннан бас тарту',k_t:'Киоск: талон алу',k_pick:'Санатыңызды басыңыз',k_take:'Талоныңызды алыңыз және экранды қараңыз',k_new:'Жаңа талон',o_t:'Оператор: терезе 4',o_cur:'Қазіргі талон',o_next:'Келесіні шақыру',o_serve:'Қызмет көрсетілді',o_miss:'Келмеді',st_called:'Шақырылды',st_served:'Қызмет көрсетілді',st_missed:'Келмеді',o_left:'Кезекте',o_done:'Қызмет көрсетілген',o_missed:'Келмегендер',m_t:'Басшы: статистика',m_wait:'Жаңа талонға болжамды күту',m_goal:'Мақсат: ≤ 30 мин',demo:'Мысал деректермен жұмыс істейтін прототип'},
+ru:{sub:'Цифровая очередь за льготными проездными билетами',tab_res:'Житель',tab_kiosk:'Киоск',tab_op:'Оператор',tab_mgr:'Руководитель',s1:'Категория',s2:'Документы',s3:'Подтверждение',s4:'Талон',cat_pen:'Пенсионер',cat_stu:'Студент',cat_sch:'Школьник',cat_gen:'Общая очередь',pick_cat:'Выберите свою категорию',next:'Продолжить',back:'Назад',docs_t:'Возьмите с собой',doc_pen:'Удостоверение личности и пенсионное удостоверение',doc_stu:'Удостоверение личности и студенческий билет',doc_sch:'Школьный документ или удостоверение личности',doc_gen:'Удостоверение личности',conf_t:'Подтвердите талон',category:'Категория',take:'Получить талон',your:'Ваш талон',serving:'Сейчас обслуживается',ahead:'Перед вами',eta:'Прогноз',min:'мин',far:'Мы отправим уведомление, когда перед вами останется 5 человек.',near:'Ваша очередь близко! Приготовьтесь подойти к окну.',now:'Ваша очередь! Подойдите к окну.',cancel:'Отказаться от талона',k_t:'Киоск: получение талона',k_pick:'Нажмите на свою категорию',k_take:'Возьмите талон и следите за экраном',k_new:'Новый талон',o_t:'Оператор: окно 4',o_cur:'Текущий талон',o_next:'Вызвать следующего',o_serve:'Обслужен',o_miss:'Не явился',st_called:'Вызван',st_served:'Обслужен',st_missed:'Не явился',o_left:'В очереди',o_done:'Обслужено',o_missed:'Не явились',m_t:'Руководитель: статистика',m_wait:'Прогноз ожидания для нового талона',m_goal:'Цель: ≤ 30 мин',demo:'Прототип на примерных данных'},
+en:{sub:'Digital queue for concession transit tickets',tab_res:'Resident',tab_kiosk:'Kiosk',tab_op:'Operator',tab_mgr:'Manager',s1:'Category',s2:'Documents',s3:'Confirm',s4:'Ticket',cat_pen:'Pensioner',cat_stu:'Student',cat_sch:'Schoolchild',cat_gen:'General queue',pick_cat:'Choose your category',next:'Continue',back:'Back',docs_t:'Bring with you',doc_pen:'ID and pensioner certificate',doc_stu:'ID and student card',doc_sch:'School ID or identity document',doc_gen:'Identity document',conf_t:'Confirm your ticket',category:'Category',take:'Get ticket',your:'Your ticket',serving:'Now serving',ahead:'Ahead of you',eta:'Estimate',min:'min',far:'We will notify you when 5 people are left ahead of you.',near:'Your turn is close! Get ready to go to the window.',now:"It's your turn! Please go to the window.",cancel:'Cancel ticket',k_t:'Kiosk: get a ticket',k_pick:'Tap your category',k_take:'Take your ticket and watch the screen',k_new:'New ticket',o_t:'Operator: window 4',o_cur:'Current ticket',o_next:'Call next',o_serve:'Served',o_miss:'No-show',st_called:'Called',st_served:'Served',st_missed:'No-show',o_left:'In queue',o_done:'Served',o_missed:'No-shows',m_t:'Manager: statistics',m_wait:'Estimated wait for a new ticket',m_goal:'Goal: ≤ 30 min',demo:'Prototype using sample data'}
+};
+const CATS=['pen','stu','sch','gen'];
+const S={lang:'kk',tab:'res',step:1,cat:null,my:null,myCat:null,serving:283,last:509,status:'called',done:0,miss:0,kNum:null,kCat:null};
+const app=document.getElementById('app');
+const wait=n=>Math.floor(Math.max(0,n)*5/10);
+
+function resView(L){
+  const steps=['s1','s2','s3','s4'].map((k,i)=>`<li class="${S.step===i+1?'on':S.step>i+1?'done':''}">${i+1}. ${L[k]}</li>`).join('');
+  let b='';
+  if(S.step===1){
+    b=`<h2>${L.pick_cat}</h2><div>${CATS.map(c=>`<button class="opt" data-act="cat" data-v="${c}" aria-pressed="${S.cat===c}">${L['cat_'+c]}</button>`).join('')}</div><button class="btn" data-act="next" ${S.cat?'':'disabled'}>${L.next}</button>`;
+  }else if(S.step===2){
+    b=`<div class="card"><h2>${L.docs_t}</h2><p>${L['doc_'+S.cat]}</p></div><div class="row"><button class="btn sec" data-act="back">${L.back}</button><button class="btn" data-act="next">${L.next}</button></div>`;
+  }else if(S.step===3){
+    b=`<div class="card"><h2>${L.conf_t}</h2><p class="mute">${L.category}</p><p class="stat">${L['cat_'+S.cat]}</p></div><div class="row"><button class="btn sec" data-act="back">${L.back}</button><button class="btn" data-act="take">${L.take}</button></div>`;
+  }else{
+    const ahead=Math.max(0,S.my-S.serving);
+    const [txt,cls]=ahead===0?[L.now,'warn']:ahead<=5?[L.near,'warn']:[L.far,''];
+    b=`<div class="card c"><div class="mute">${L.your} · ${L['cat_'+S.myCat]}</div><div class="num">${S.my}</div><div class="mute">${L.serving}: ${S.serving}</div></div>
+    <div class="row"><div class="card"><div class="mute">${L.ahead}</div><div class="stat">${ahead}</div></div><div class="card"><div class="mute">${L.eta}</div><div class="stat">~${wait(ahead)} ${L.min}</div></div></div>
+    <div class="note ${cls}" aria-live="polite">${txt}</div>
+    <button class="btn bad" data-act="cancel">${L.cancel}</button>`;
+  }
+  return `<ol class="steps">${steps}</ol>${b}`;
+}
+function kioskView(L){
+  if(S.kNum===null) return `<h2>${L.k_t}</h2><p class="mute">${L.k_pick}</p><div class="kgrid">${CATS.map(c=>`<button class="opt" data-act="kcat" data-v="${c}">${L['cat_'+c]}</button>`).join('')}</div>`;
+  return `<div class="card c"><div class="mute">${L['cat_'+S.kCat]}</div><div class="num">${S.kNum}</div><div class="mute">${L.ahead}: ${Math.max(0,S.kNum-S.serving)}</div><p>${L.k_take}</p></div><button class="btn sec" data-act="knew">${L.k_new}</button>`;
+}
+function opView(L){
+  const called=S.status==='called';
+  return `<h2>${L.o_t}</h2><div class="row"><div class="card c"><div class="mute">${L.o_cur}</div><div class="num">${S.serving}</div><div class="mute">${L['st_'+S.status]}</div></div><div class="card"><div class="mute">${L.o_left}</div><div class="stat">${S.last-S.serving}</div><div class="mute">${L.o_done}: ${S.done}</div><div class="mute">${L.o_missed}: ${S.miss}</div></div></div>
+  <button class="btn" data-act="opnext" ${(!called&&S.last>S.serving)?'':'disabled'}>${L.o_next}</button>
+  <div class="row"><button class="btn sec" data-act="opserve" ${called?'':'disabled'}>${L.o_serve}</button><button class="btn bad" data-act="opmiss" ${called?'':'disabled'}>${L.o_miss}</button></div>`;
+}
+function mgrView(L){
+  return `<h2>${L.m_t}</h2><div class="row"><div class="card"><div class="mute">${L.o_left}</div><div class="stat">${S.last-S.serving}</div></div><div class="card"><div class="mute">${L.o_done}</div><div class="stat">${S.done}</div></div><div class="card"><div class="mute">${L.o_missed}</div><div class="stat">${S.miss}</div></div></div>
+  <div class="card"><div class="mute">${L.m_wait}</div><div class="stat">~${wait(S.last+1-S.serving)} ${L.min}</div><div class="mute">${L.m_goal}</div></div>`;
+}
+function render(){
+  const L=T[S.lang];
+  const a=document.activeElement;
+  const fk=a&&a.dataset&&a.dataset.act?[a.dataset.act,a.dataset.v]:null;
+  document.documentElement.lang=S.lang;
+  const tabs=[['res','tab_res'],['kiosk','tab_kiosk'],['op','tab_op'],['mgr','tab_mgr']];
+  const view={res:resView,kiosk:kioskView,op:opView,mgr:mgrView}[S.tab](L);
+  app.innerHTML=`<header><div><div class="brand">AstanaQueue</div><p class="sub">${L.sub}</p></div><div class="langs" role="group" aria-label="Language">${['kk','ru','en'].map(l=>`<button class="lang" data-act="lang" data-v="${l}" aria-pressed="${S.lang===l}">${l.toUpperCase()}</button>`).join('')}</div></header>
+  <nav class="tabs" role="tablist">${tabs.map(([k,t])=>`<button class="tab" role="tab" data-act="tab" data-v="${k}" aria-selected="${S.tab===k}">${L[t]}</button>`).join('')}</nav>
+  <main>${view}</main><footer>${L.demo}</footer>`;
+  if(fk){const n=app.querySelector(`[data-act="${fk[0]}"]`+(fk[1]?`[data-v="${fk[1]}"]`:''));if(n&&!n.disabled)n.focus();}
+}
+const ACT={
+  lang:v=>S.lang=v, tab:v=>S.tab=v, cat:v=>S.cat=v,
+  next:()=>{if(S.step===1&&!S.cat)return;S.step=Math.min(3,S.step+1)},
+  back:()=>S.step=Math.max(1,S.step-1),
+  take:()=>{S.my=++S.last;S.myCat=S.cat;S.step=4},
+  cancel:()=>{S.my=null;S.myCat=null;S.cat=null;S.step=1},
+  kcat:v=>{S.kNum=++S.last;S.kCat=v}, knew:()=>{S.kNum=null;S.kCat=null},
+  opnext:()=>{if(S.status!=='called'&&S.last>S.serving){S.serving++;S.status='called'}},
+  opserve:()=>{if(S.status==='called'){S.done++;S.status='served'}},
+  opmiss:()=>{if(S.status==='called'){S.miss++;S.status='missed'}}
+};
+app.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;ACT[b.dataset.act](b.dataset.v);render();});
+setInterval(()=>{
+  if(S.my!==null&&S.serving<S.my-1){S.serving=Math.min(S.my-1,S.serving+4);S.status='called';render();}
+},2000);
+render();
+</script>
+</body>
+</html>
